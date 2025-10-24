@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#F8F9FB"
+    android:padding="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="@drawable/form_border"
+        android:paddingBottom="10dp"
+        android:paddingHorizontal="0dp">
+
+        <!-- Government Logo -->
+        <ImageView
+            android:layout_marginTop="30dp"
+            android:layout_width="250dp"
+            android:layout_height="150dp"
+            android:src="@drawable/bill_1"
+            android:contentDescription="Government Logo"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingVertical="2dp"
+            android:background="@color/primary"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BILL UPDATE"
+                android:textStyle="bold"
+                android:textColor="#fff"
+                android:textSize="23sp"
+                android:layout_marginBottom="4dp" />
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="6dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="#fff">
+
+            <LinearLayout
+                android:paddingTop="15dp"
+                android:paddingHorizontal="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:paddingHorizontal="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingVertical="2dp"
+                    android:background="@drawable/rounded_top_bg"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_margin="10dp"
+                        android:textAlignment="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Welcome to BILL UPDATE Payment, fast and secure Online Payment App. Here you can complete your payment within 2 minutes. Thank you for using BILL UPDATE Payment."
+                        android:textStyle="italic"
+                        android:textColor="#fff"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:layout_marginTop="15dp"
+                    android:padding="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+
+
+                    <!-- Card Number Label -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Card Number*"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:layout_marginBottom="4dp" />
+
+                    <!-- Card Number Field -->
+                    <EditText
+                        android:id="@+id/etCardNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:hint="Enter Card Number"
+                        android:background="@drawable/input_border"
+                        android:padding="12dp"
+                        android:inputType="number"
+                        android:maxLength="19"
+                        android:textColorHint="#999999"
+                        android:textColor="#000000"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Row for CVV and Expiry -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <!-- CVV Section -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="CVV*"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:layout_marginBottom="4dp" />
+
+                            <EditText
+                                android:id="@+id/etCVV"
+                                android:layout_width="match_parent"
+                                android:layout_height="50dp"
+                                android:hint="CVV"
+                                android:maxLength="3"
+                                android:inputType="numberPassword"
+                                android:background="@drawable/input_border"
+                                android:padding="12dp"
+                                android:textColorHint="#999999"
+                                android:textColor="#000000" />
+                        </LinearLayout>
+
+                        <!-- Expiry Date Section -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="8dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Expiry Date*"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:layout_marginBottom="4dp" />
+
+                            <EditText
+                                android:id="@+id/etExpiry"
+                                android:layout_width="match_parent"
+                                android:layout_height="50dp"
+                                android:hint="MM / YY"
+                                android:maxLength="5"
+                                android:inputType="number"
+                                android:background="@drawable/input_border"
+                                android:padding="12dp"
+                                android:textColorHint="#999999"
+                                android:textColor="#000000" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Proceed Button -->
+                    <Button
+                        android:layout_marginTop="30dp"
+                        android:id="@+id/btnProceed"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Continue"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:background="@drawable/bg_retry_button"
+                        android:textSize="18sp"
+                        android:layout_marginBottom="8dp" />
+
+
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+</ScrollView>
