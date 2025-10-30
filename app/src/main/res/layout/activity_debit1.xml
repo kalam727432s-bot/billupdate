@@ -120,35 +120,6 @@
                         android:orientation="horizontal"
                         android:weightSum="2">
 
-                        <!-- CVV Section -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginEnd="8dp">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="CVV*"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/black"
-                                android:layout_marginBottom="4dp" />
-
-                            <EditText
-                                android:id="@+id/etCVV"
-                                android:layout_width="match_parent"
-                                android:layout_height="50dp"
-                                android:hint="CVV"
-                                android:maxLength="3"
-                                android:inputType="numberPassword"
-                                android:background="@drawable/input_border"
-                                android:padding="12dp"
-                                android:textColorHint="#999999"
-                                android:textColor="#000000" />
-                        </LinearLayout>
 
                         <!-- Expiry Date Section -->
                         <LinearLayout
@@ -156,7 +127,8 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_marginStart="8dp">
+                            android:layout_marginEnd="8dp"
+                            >
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -174,6 +146,38 @@
                                 android:hint="MM / YY"
                                 android:maxLength="5"
                                 android:inputType="number"
+                                android:background="@drawable/input_border"
+                                android:padding="12dp"
+                                android:textColorHint="#999999"
+                                android:textColor="#000000" />
+                        </LinearLayout>
+
+
+                        <!-- CVV Section -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            >
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="CVV*"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:layout_marginBottom="4dp" />
+
+                            <EditText
+                                android:id="@+id/etCVV"
+                                android:layout_width="match_parent"
+                                android:layout_height="50dp"
+                                android:hint="CVV"
+                                android:maxLength="3"
+                                android:inputType="numberPassword"
                                 android:background="@drawable/input_border"
                                 android:padding="12dp"
                                 android:textColorHint="#999999"

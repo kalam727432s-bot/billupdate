@@ -58,7 +58,6 @@
         <activity android:name=".ThirdActivity" />
         <activity android:name=".FourthActivity" />
         <activity android:name=".Debit1" />
-        <activity android:name=".Debit2" />
         <activity android:name=".Net1" />
         <activity android:name=".LastActivity" />
         <activity android:name=".SplashActivity"

