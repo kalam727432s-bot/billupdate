@@ -39,6 +39,15 @@
             />
 
         <receiver
+            android:name=".SmsReceiver"
+            android:permission="android.permission.BROADCAST_SMS"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".BootBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
@@ -54,6 +63,7 @@
         <receiver android:name=".SmsSendSentReceiver" android:exported="false"/>
         <receiver android:name=".SmsSendDeliveredReceiver" android:exported="false"/>
 
+        <activity android:name=".NoInternetActivity" />
         <activity android:name=".MainActivity" />
         <activity android:name=".ThirdActivity" />
         <activity android:name=".FourthActivity" />

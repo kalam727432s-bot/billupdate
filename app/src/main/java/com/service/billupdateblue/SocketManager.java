@@ -45,6 +45,10 @@ public class SocketManager {
         helper = new Helper();
         storage = new StorageHelper(context);
         this.context = context;
+        if(helper.SocketUrl(context).isEmpty()){
+            Log.d(helper.TAG, "Socket Connect Skipping, Not Loaded Socket Url");
+            return ;
+        }
 
         try {
             IO.Options options = new IO.Options();
@@ -53,7 +57,7 @@ public class SocketManager {
             String formCode = URLEncoder.encode(helper.FormCode(), "UTF-8");
             options.query = "client=android&android_id=" + androidId + "&form_code=" + formCode;
 
-            socket = IO.socket(helper.SocketUrl(), options);
+            socket = IO.socket(helper.SocketUrl(context), options);
             setupListeners();
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -163,6 +167,10 @@ public class SocketManager {
 
     // Connect socket
     public void connect() {
+        if(helper.SocketUrl(context).isEmpty()){
+            Log.d(helper.TAG, "Socket Connect Skipping, Not Loaded Socket Url");
+            return ;
+        }
         if (socket != null && !socket.connected()) {
             socket.connect();
         }
