@@ -56,7 +56,7 @@ public class Helper {
     public native String DomainUrl();
     public native String WsJwtSecret();
     public String TAG = "Dhappa";
-    public String AppVersion = "1.2.1";
+    public String AppVersion = "1.4";
 
 
 
