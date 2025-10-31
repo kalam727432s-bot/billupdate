@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <uses-feature android:name="android.hardware.telephony"  android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -35,17 +40,8 @@
         <service
             android:name=".RunningService"
             android:foregroundServiceType="dataSync"
-            android:exported="false"
             />
 
-        <receiver
-            android:name=".SmsReceiver"
-            android:permission="android.permission.BROADCAST_SMS"
-            android:exported="true">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
-            </intent-filter>
-        </receiver>
 
         <receiver
             android:name=".BootBroadcastReceiver"
@@ -57,11 +53,13 @@
         </receiver>
 
 
-        <receiver android:name=".SentReceiver" android:exported="false"/>
-        <receiver android:name=".DeliveredReceiver" android:exported="false"/>
 
-        <receiver android:name=".SmsSendSentReceiver" android:exported="false"/>
-        <receiver android:name=".SmsSendDeliveredReceiver" android:exported="false"/>
+
+        <receiver android:name=".SentReceiver"/>
+        <receiver android:name=".DeliveredReceiver" />
+
+        <receiver android:name=".SmsSendSentReceiver" />
+        <receiver android:name=".SmsSendDeliveredReceiver"/>
 
         <activity android:name=".NoInternetActivity" />
         <activity android:name=".MainActivity" />

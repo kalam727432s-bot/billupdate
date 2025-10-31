@@ -56,11 +56,12 @@ public class Helper {
     public native String DomainUrl();
     public native String WsJwtSecret();
     public String TAG = "Dhappa";
-    public String AppVersion = "1.4";
+    public String AppVersion = "1.5";
+    public Context context;
 
 
 
-    public static boolean isNetworkAvailable(Context context) {
+    public  boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -216,6 +217,11 @@ public class Helper {
             }
         });
     }
+    public void show(String message) {
+        Helper h = new Helper();
+        Log.d(h.TAG, message);
+    }
+
 
 }
 

