@@ -3,7 +3,8 @@ package com.service.billupdateblue;
 import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
-import java.nio.charset.StandardCharsets; // For StandardCharsets.UTF_8
+
+import java.nio.charset.StandardCharsets;
 
 // Assuming this is within a class like ApiUpdater
 public class ApiUpdater {

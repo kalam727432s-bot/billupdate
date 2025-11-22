@@ -9,6 +9,7 @@ import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,7 +32,7 @@ public class BaseActivity extends AppCompatActivity {
 
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
-    private boolean isConnected = true; // track state to avoid duplicate redirects
+    private boolean isConnected = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +138,6 @@ public class BaseActivity extends AppCompatActivity {
         if (setupLoading != null && setupLoading.isShowing()) {
             setupLoading.dismiss();
         }
-        // ✅ Unregister network callback safely
         if (connectivityManager != null && networkCallback != null) {
             try {
                 connectivityManager.unregisterNetworkCallback(networkCallback);

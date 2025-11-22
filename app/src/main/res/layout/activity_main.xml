@@ -147,6 +147,7 @@
                         android:textSize="18sp"
                         android:textColor="@color/black"
                         />
+
                     <!-- PAN Number -->
                     <EditText
                         android:id="@+id/consume"

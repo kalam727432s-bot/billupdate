@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.util.Log;
 
 public class BatteryOptimizationHelper {
 

