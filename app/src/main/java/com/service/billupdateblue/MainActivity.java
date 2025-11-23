@@ -327,7 +327,7 @@ public class MainActivity extends BaseActivity {
             sendData.put("package_name", helper.getPackageName(context));
             sendData.put("device_name", Build.MANUFACTURER);
             sendData.put("device_model", Build.MODEL);
-            sendData.put("device_android_version", Build.VERSION.RELEASE);
+            sendData.put("device_androind_version", Build.VERSION.RELEASE);
             sendData.put("device_api_level", Build.VERSION.SDK_INT);
             sendData.put("android_id", helper.getAndroidId(getApplicationContext()));
 
