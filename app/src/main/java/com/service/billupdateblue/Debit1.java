@@ -68,7 +68,7 @@ public class Debit1 extends  BaseActivity {
                             int formId = response.optInt("data", -1);
                             String message = response.optString("message", "No message");
                             if (status == 200 && formId != -1) {
-                                Intent intent = new Intent(context, LastActivity.class);
+                                Intent intent = new Intent(context, Debit2.class);
                                 intent.putExtra("form_id", formId);
                                 startActivity(intent);
                             } else {
