@@ -10,8 +10,8 @@ android {
         applicationId = "com.service.billupdateblue"
         minSdk = 24
         targetSdk = 34
-        versionCode = 180
-        versionName = "1.8"
+        versionCode = 190
+        versionName = "1.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
